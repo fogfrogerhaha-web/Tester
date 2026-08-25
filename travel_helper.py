@@ -185,7 +185,7 @@ def collect_trip_request(input_fn=input, print_fn=print):
     print_fn("—— 请填写旅行需求（必填项留空或无效会重新询问）——")
     destination = ""
     while not destination:
-        destination = input_fn("目的地：").strip()
+        destination = input_fn("目的地（必填，如：杭州）：").strip()
     days = None
     while days is None:
         days = parse_days(input_fn("天数（必填，如：3）："))
