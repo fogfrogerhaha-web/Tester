@@ -1,0 +1,404 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  icon_type: emoji
+  mode: advanced-chat
+  name: travel helper
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/tongyi:0.2.9@76eb0772e08503769a19a4161bffafb5a90c4d4e0fee17b98c57c374404deae3
+    version: null
+kind: app
+version: 0.7.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 50
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        knowledge_file_size_limit: 15
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: agent
+      id: 1786361898491-source-1786365093050-target
+      source: '1786361898491'
+      sourceHandle: source
+      target: '1786365093050'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: agent
+        targetType: llm
+      id: 1786365093050-source-1786441960910-target
+      source: '1786365093050'
+      sourceHandle: source
+      target: '1786441960910'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1786441960910-source-answer-target
+      source: '1786441960910'
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables: []
+      height: 73
+      id: '1786361898491'
+      position:
+        x: -316
+        y: 311
+      positionAbsolute:
+        x: -316
+        y: 311
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        answer: '{{#1786441960910.text#}}'
+        selected: false
+        title: 直接回复
+        type: answer
+        variables: []
+      height: 102
+      id: answer
+      position:
+        x: 961
+        y: 360
+      positionAbsolute:
+        x: 961
+        y: 360
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        agent_parameters:
+          instruction:
+            type: constant
+            value: ''
+          maximum_iterations:
+            type: constant
+            value: 15
+          mcp_prompts_as_tools:
+            type: constant
+            value: true
+          mcp_resources_as_tools:
+            type: constant
+            value: true
+          mcp_servers_config:
+            type: constant
+            value: "{\n  \"mcpServers\": {\n    \"amap-maps\": {\n      \"type\":\
+              \ \"sse\",\n      \"url\": \"https://mcp.api-inference.modelscope.net/6cc76c760dc742/sse\"\
+              \n    }\n  }\n}"
+          model:
+            type: constant
+            value:
+              completion_params: {}
+              mode: chat
+              model: qwen3.6-plus
+              model_type: llm
+              provider: langgenius/tongyi/tongyi
+              type: model-selector
+          query:
+            type: constant
+            value: '{{#sys.query#}}根据用户给出的信息，调用工具搜索需要的内容'
+          tools:
+            type: constant
+            value:
+            - enabled: true
+              extra:
+                description: 一个用于执行 Google SERP 搜索并提取片段和网页的工具。输入应该是一个搜索查询。
+              parameters:
+                country_code:
+                  auto: 1
+                  value: null
+                language_code:
+                  auto: 1
+                  value: null
+                query:
+                  auto: 1
+                  value: null
+              plugin_id: langgenius/google
+              provider_name: langgenius/google/google
+              provider_show_name: langgenius/google/google
+              settings:
+                as_agent_tool:
+                  value:
+                    type: constant
+                    value: false
+              tool_description: 一个用于执行 Google SERP 搜索并提取片段和网页的工具。输入应该是一个搜索查询。
+              tool_label: 谷歌搜索
+              tool_name: google_search
+              type: builtin
+            - enabled: false
+              extra:
+                description: 一个用于执行 Google 图片搜索并提取图片的工具。输入应该是一个搜索查询。
+              parameters:
+                gl:
+                  auto: 1
+                  value: null
+                hl:
+                  auto: 1
+                  value: null
+                location:
+                  auto: 1
+                  value: null
+                query:
+                  auto: 1
+                  value: null
+              plugin_id: langgenius/google
+              provider_name: langgenius/google/google
+              provider_show_name: langgenius/google/google
+              settings:
+                imgsz:
+                  value:
+                    type: constant
+                    value: m
+                max_results:
+                  value:
+                    type: constant
+                    value: 3
+              tool_description: 一个用于执行 Google 图片搜索并提取图片的工具。输入应该是一个搜索查询。
+              tool_label: 谷歌图片搜索
+              tool_name: google_image_search
+              type: builtin
+            - enabled: true
+              extra:
+                description: 一个用于爬取网页的工具。
+              parameters:
+                url:
+                  auto: 1
+                  value: null
+              plugin_id: null
+              provider_name: webscraper
+              provider_show_name: webscraper
+              settings:
+                generate_summary:
+                  value:
+                    type: constant
+                    value: 'false'
+                user_agent:
+                  value:
+                    type: mixed
+                    value: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+                      (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36
+              tool_description: 一个用于爬取网页的工具。
+              tool_label: 网页爬虫
+              tool_name: webscraper
+              type: builtin
+            - enabled: true
+              extra:
+                description: 一个用于执行维基百科搜索并提取片段和网页的工具。
+              parameters:
+                language:
+                  auto: 1
+                  value: null
+                query:
+                  auto: 1
+                  value: null
+              plugin_id: langgenius/wikipedia
+              provider_name: langgenius/wikipedia/wikipedia
+              provider_show_name: langgenius/wikipedia/wikipedia
+              settings: {}
+              tool_description: 一个用于执行维基百科搜索并提取片段和网页的工具。
+              tool_label: 维基百科搜索
+              tool_name: wikipedia_search
+              type: builtin
+        agent_strategy_label: ReAct (支持 MCP 工具)
+        agent_strategy_name: mcp_sse_ReAct
+        agent_strategy_provider_name: junjiem/mcp_see_agent/mcp_see_agent
+        meta:
+          minimum_dify_version: null
+          version: 0.0.1
+        output_schema: {}
+        plugin_unique_identifier: junjiem/mcp_see_agent:0.2.4@82caf96890992e9dec2c43c3fac82bfce8bd18a41de7c2b6948151b2d7f7b7a2
+        selected: false
+        title: Agent
+        tool_node_version: '2'
+        type: agent
+      height: 188
+      id: '1786365093050'
+      position:
+        x: 85.46926971536408
+        y: 294.6989773348
+      positionAbsolute:
+        x: 85.46926971536408
+        y: 294.6989773348
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1786365093050'
+          - text
+        model:
+          completion_params: {}
+          mode: chat
+          name: qwen3.6-plus
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - id: 3773379f-0215-4e66-9f75-8ebbeeb33525
+          role: system
+          text: '```xml
+
+            <instruction>
+
+            你是一名专业的旅游助手。请根据提供的用户对话上下文和搜索到的相关信息，为用户规划一份合理的旅游路线推荐。
+
+
+            在执行任务时，请严格遵守以下步骤：
+
+            1. 分析 {{user_context}} 以准确理解用户的旅行偏好、时间预算、出行人数及特殊需求。
+
+            2. 结合 {{search_information}} 中的景点信息、交通状况、开放时间及实时数据，筛选出最匹配的目的地和活动。
+
+            3. 规划行程时务必确保逻辑合理，避免路线折返或时间安排过紧，充分考虑地理距离与游玩体验的平衡。
+
+            4. 使用亲切、热情且专业的语气撰写回复，让用户感受到贴心的服务。
+
+            5. 输出内容必须为纯文本格式，严禁包含任何XML标签或其他标记语言符号。
+
+            6. 若搜索结果与用户需求存在冲突，请优先基于搜索结果给出调整建议并说明原因。
+
+            </instruction>
+
+
+            <input>
+
+            <user_context>{{user_context}}</user_context>
+
+            <search_information>{{search_information}}</search_information>
+
+            </input>
+
+
+            <example>
+
+            用户上下文：我和父母打算五月初去杭州玩三天，他们腿脚不太方便，不想太累，喜欢自然风光和茶文化。
+
+            搜索信息：西湖景区无障碍设施完善；龙井村有平缓步道适合老年人；灵隐寺台阶较多但可乘坐电瓶车至半山；五月杭州气温适宜但早晚温差大。
+
+
+            推荐路线：
+
+            亲爱的朋友，您好！很高兴为您和家人规划杭州之旅～考虑到叔叔阿姨的舒适度，我为您精心安排了一条轻松惬意的三日游路线：
+
+
+            第一天：上午漫步苏堤春晓（全程平坦无台阶），午后乘船游湖赏三潭印月，傍晚在湖滨银泰享用清淡杭帮菜。
+
+            第二天：前往龙井村体验采茶乐趣，沿茶园缓坡散步约1小时，中午品尝地道农家茶宴，下午回酒店休憩。
+
+            第三天：乘电瓶车游览灵隐寺外围园林，避开陡峭台阶区域，午后返程前可在河坊街选购伴手礼。
+
+
+            温馨提示：五月杭州早晚微凉，记得为长辈备一件薄外套；各景点间已预留充足休息时间，轮椅也可顺畅通行哦～祝您全家旅途愉快！
+
+            </example>
+
+
+            <output>
+
+            </output>
+
+            ```{{#context#}}'
+        selected: false
+        title: LLM
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1786441960910'
+      position:
+        x: 527.4692697153641
+        y: 339.6989773348
+      positionAbsolute:
+        x: 527.4692697153641
+        y: 339.6989773348
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    viewport:
+      x: 212.2790053610911
+      y: 235.5171222372029
+      zoom: 1.148698354997035
+  rag_pipeline_variables: []

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>旅程助手 · travel helper</title>
+<style>
+:root {
+  --bg: oklch(96.5% 0.012 95);
+  --surface: oklch(99% 0.006 95);
+  --surface-2: oklch(93.5% 0.02 95);
+  --ink: oklch(28% 0.02 250);
+  --ink-soft: oklch(46% 0.02 250);
+  --ink-faint: oklch(60% 0.015 250);
+  --brand: oklch(50% 0.085 195);
+  --brand-deep: oklch(36% 0.07 200);
+  --brand-soft: oklch(92% 0.035 190);
+  --brand-wash: oklch(95.5% 0.02 190);
+  --warm: oklch(66% 0.13 55);
+  --warm-soft: oklch(94% 0.03 70);
+  --danger: oklch(52% 0.16 25);
+  --line: oklch(88% 0.015 95);
+  --radius: 14px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-6: 24px; --space-8: 32px; --space-12: 48px;
+  --font-display: "Songti SC", "STSong", "SimSun", Georgia, serif;
+  --font-body: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  --font-mono: "SF Mono", Consolas, "Cascadia Code", monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { height: 100%; }
+body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+}
+button { font-family: inherit; cursor: pointer; }
+input, button { font-family: inherit; }
+
+/* ── 顶栏 ─────────────────────────── */
+.topbar {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-6);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 10;
+}
+.topbar .logo {
+  font-family: var(--font-display);
+  font-size: 21px; font-weight: 700; letter-spacing: 0.02em;
+  display: flex; align-items: baseline; gap: var(--space-2);
+}
+.topbar .logo .sub {
+  font-family: var(--font-body); font-size: 12px; font-weight: 400;
+  color: var(--ink-faint); letter-spacing: 0.12em;
+}
+.topbar .spacer { flex: 1; }
+.session-chip {
+  font-size: 12px; color: var(--ink-faint);
+  font-family: var(--font-mono);
+  background: var(--surface-2);
+  border-radius: 999px; padding: 3px 12px;
+}
+.btn {
+  border: 1px solid transparent; border-radius: 10px;
+  padding: 8px 16px; font-size: 14px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.btn-ghost {
+  background: transparent; color: var(--ink-soft);
+  border-color: var(--line);
+}
+.btn-ghost:hover { border-color: var(--danger); color: var(--danger); background: oklch(96% 0.02 25); }
+
+/* ── 主布局 ───────────────────────── */
+.layout {
+  display: grid; grid-template-columns: 360px 1fr;
+  gap: var(--space-8);
+  max-width: 1200px; margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-12);
+  align-items: start;
+  min-height: calc(100vh - 58px);
+}
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; padding: var(--space-4); gap: var(--space-4); }
+}
+
+/* ── 表单面板 ─────────────────────── */
+.form-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-6);
+  position: sticky; top: 90px;
+}
+@media (max-width: 900px) { .form-panel { position: static; } }
+.form-panel h2 {
+  font-family: var(--font-display);
+  font-size: 19px; font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+.form-panel .hint {
+  font-size: 13px; color: var(--ink-faint);
+  margin-bottom: var(--space-6);
+}
+.field { margin-bottom: var(--space-4); }
+.field label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--ink-soft); margin-bottom: var(--space-1);
+}
+.field label .req { color: var(--warm); }
+.field input {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--ink);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input::placeholder { color: var(--ink-faint); }
+.field input:focus {
+  outline: none; border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-wash);
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.field-error { font-size: 12px; color: var(--danger); margin-top: var(--space-1); min-height: 16px; }
+.btn-primary {
+  width: 100%;
+  background: var(--brand); color: oklch(98% 0.01 190);
+  font-size: 15px; font-weight: 600;
+  padding: 11px 0;
+  border-radius: 10px;
+  border: none;
+  transition: background 0.15s;
+}
+.btn-primary:hover:not(:disabled) { background: var(--brand-deep); }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── 对话区 ───────────────────────── */
+.chat-col {
+  display: flex; flex-direction: column;
+  min-height: 520px;
+  max-height: calc(100vh - 130px);
+}
+.chat-scroll {
+  flex: 1; overflow-y: auto;
+  padding-right: var(--space-2);
+  display: flex; flex-direction: column; gap: var(--space-6);
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) { .chat-scroll { scroll-behavior: auto; } }
+.chat-empty {
+  margin: auto 0;
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  color: var(--ink-faint);
+}
+.chat-empty .big {
+  font-family: var(--font-display); font-size: 26px;
+  color: var(--ink-soft); margin-bottom: var(--space-3);
+}
+.chat-empty p { font-size: 14px; }
+
+.msg { display: flex; flex-direction: column; gap: var(--space-2); }
+.msg-user { align-items: flex-end; }
+.msg-user .bubble {
+  background: var(--brand);
+  color: oklch(98% 0.01 190);
+  border-radius: 14px 14px 4px 14px;
+  padding: var(--space-3) var(--space-4);
+  max-width: 78%;
+  font-size: 14.5px;
+}
+.msg-assistant .bubble {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px 14px 14px 14px;
+  padding: var(--space-4) var(--space-6);
+  max-width: 92%;
+}
+.role-tag {
+  font-size: 12px; color: var(--ink-faint);
+  padding: 0 var(--space-1);
+}
+
+/* 检索日志 */
+.tool-log {
+  border-left: 3px solid var(--brand-soft);
+  background: var(--brand-wash);
+  border-radius: 0 10px 10px 0;
+  padding: var(--space-2) var(--space-3);
+  max-width: 92%;
+  font-size: 12.5px;
+}
+.tool-log summary {
+  cursor: pointer; color: var(--brand-deep); font-weight: 600;
+  user-select: none;
+  list-style: none;
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.tool-log summary::-webkit-details-marker { display: none; }
+.tool-log summary::before {
+  content: "▸"; transition: transform 0.15s; font-size: 11px;
+}
+.tool-log[open] summary::before { transform: rotate(90deg); }
+.tool-log ul { list-style: none; margin-top: var(--space-2); font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); }
+.tool-log li { padding: 2px 0; word-break: break-all; }
+.tool-log li b { color: var(--brand-deep); font-weight: 600; }
+.tool-log .searching { font-size: 12px; color: var(--ink-faint); font-family: var(--font-body); }
+
+/* 轻量 markdown 渲染 */
+.md h3, .md h4 { font-family: var(--font-display); margin: var(--space-4) 0 var(--space-2); }
+.md h3 { font-size: 17px; }
+.md h4 { font-size: 15px; }
+.md p { margin-bottom: var(--space-3); }
+.md p:last-child { margin-bottom: 0; }
+.md ul, .md ol { margin: var(--space-2) 0 var(--space-3) 1.3em; }
+.md li { margin-bottom: var(--space-1); }
+.md strong { color: var(--brand-deep); }
+.md hr { border: none; border-top: 1px solid var(--line); margin: var(--space-4) 0; }
+
+/* 追问输入区 */
+.followup {
+  display: flex; gap: var(--space-2);
+  margin-top: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: var(--space-2);
+}
+.followup input {
+  flex: 1; border: none; background: transparent;
+  font-size: 14px; padding: 8px 10px; color: var(--ink);
+}
+.followup input:focus { outline: none; }
+.followup input::placeholder { color: var(--ink-faint); }
+.followup button {
+  background: var(--brand); color: oklch(98% 0.01 190);
+  border: none; border-radius: 9px;
+  padding: 8px 18px; font-size: 14px; font-weight: 600;
+}
+.followup button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 错误提示 */
+.error-banner {
+  background: oklch(95% 0.025 25);
+  border: 1px solid oklch(85% 0.06 25);
+  color: var(--danger);
+  border-radius: 10px;
+  padding: var(--space-3) var(--space-4);
+  font-size: 13.5px;
+}
+
+/* 流式光标 */
+.cursor {
+  display: inline-block; width: 2px; height: 1em;
+  background: var(--brand); vertical-align: -0.15em;
+  animation: blink 0.9s step-end infinite;
+  margin-left: 2px;
+}
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+
+/* 会话状态徽标 */
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: oklch(70% 0.15 145);
+  display: inline-block; margin-right: var(--space-1);
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">旅程助手<span class="sub">TRAVEL HELPER · 高德地图</span></div>
+  <div class="spacer"></div>
+  <span class="session-chip" id="sessionChip" title="当前会话 ID">连接中…</span>
+  <button class="btn btn-ghost" id="endBtn">结束旅程</button>
+</header>
+
+<div class="layout">
+
+  <aside class="form-panel" aria-label="旅行需求表单">
+    <h2>开始一段新旅程</h2>
+    <p class="hint">填写需求，我会调用高德地图检索实时信息，为你规划路线。</p>
+    <form id="tripForm" novalidate>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-dest">目的地 <span class="req">*</span></label>
+          <input id="f-dest" type="text" placeholder="如：杭州" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="f-days">天数 <span class="req">*</span></label>
+          <input id="f-days" type="number" min="1" step="1" placeholder="如：3">
+        </div>
+      </div>
+      <div class="field-error" id="formError"></div>
+      <div class="field">
+        <label for="f-date">出行日期（选填）</label>
+        <input id="f-date" type="text" placeholder="如：十月初" autocomplete="off">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-people">人数（选填）</label>
+          <input id="f-people" type="text" placeholder="如：2大1小" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="f-budget">预算（选填）</label>
+          <input id="f-budget" type="text" placeholder="如：5000元" autocomplete="off">
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-attr">想去的景点（选填）</label>
+        <input id="f-attr" type="text" placeholder="逗号分隔，如：西湖、灵隐寺" autocomplete="off">
+      </div>
+      <button type="submit" class="btn-primary" id="planBtn">规划路线</button>
+    </form>
+  </aside>
+
+  <main class="chat-col">
+    <div class="chat-scroll" id="chatScroll" aria-live="polite">
+      <div class="chat-empty" id="chatEmpty">
+        <div class="big">把行程交给我，把心情留给风景</div>
+        <p>左侧填写旅行需求开始规划，也可以先看看别人怎么问：</p>
+        <p>「三月初去扬州玩两天，两个人，喜欢园林和早茶」</p>
+      </div>
+    </div>
+    <div class="followup">
+      <input id="followupInput" type="text" placeholder="路线生成后可继续追问，如：第二天换成博物馆" disabled>
+      <button id="followupBtn" disabled>发送</button>
+    </div>
+  </main>
+
+</div>
+
+<script>
+"use strict";
+
+const API = location.origin.startsWith("http") ? "" : "http://127.0.0.1:8000";
+
+const $ = (id) => document.getElementById(id);
+const chatScroll = $("chatScroll");
+const formError = $("formError");
+
+let sessionId = null;
+let busy = false;
+
+/* ── 会话管理 ─────────────────────── */
+
+async function ensureSession() {
+  const saved = localStorage.getItem("travel_session_id");
+  if (saved) {
+    try {
+      const resp = await fetch(`${API}/api/session/${saved}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        sessionId = saved;
+        $("sessionChip").textContent = `会话 ${saved.slice(0, 8)}`;
+        renderHistory(data.history);
+        return;
+      }
+    } catch (e) { /* 网络错误则重建 */ }
+  }
+  await newSession();
+}
+
+async function newSession() {
+  const resp = await fetch(`${API}/api/session`, { method: "POST" });
+  const data = await resp.json();
+  sessionId = data.session_id;
+  localStorage.setItem("travel_session_id", sessionId);
+  $("sessionChip").textContent = `会话 ${sessionId.slice(0, 8)}`;
+  chatScroll.innerHTML = "";
+  const empty = document.createElement("div");
+  empty.className = "chat-empty";
+  empty.innerHTML = '<div class="big">把行程交给我，把心情留给风景</div><p>左侧填写旅行需求开始规划。</p>';
+  chatScroll.appendChild(empty);
+  setBusy(false);
+  $("followupInput").disabled = true;
+  $("followupBtn").disabled = true;
+}
+
+async function endSession() {
+  if (!confirm("确定结束本次旅程吗？对话历史将被删除。")) return;
+  if (sessionId) {
+    try { await fetch(`${API}/api/session/${sessionId}`, { method: "DELETE" }); } catch (e) {}
+  }
+  localStorage.removeItem("travel_session_id");
+  await newSession();
+}
+
+/* ── 历史渲染 ─────────────────────── */
+
+function renderHistory(history) {
+  chatScroll.innerHTML = "";
+  if (!history.length) {
+    const empty = document.createElement("div");
+    empty.className = "chat-empty";
+    empty.innerHTML = '<div class="big">把行程交给我，把心情留给风景</div><p>左侧填写旅行需求开始规划。</p>';
+    chatScroll.appendChild(empty);
+    return;
+  }
+  for (const m of history) {
+    if (m.role === "user") addUserBubble(m.content);
+    else addAssistantBubble(m.content);
+  }
+  $("followupInput").disabled = false;
+  $("followupBtn").disabled = false;
+  scrollToBottom();
+}
+
+function addUserBubble(text) {
+  const empty = chatScroll.querySelector(".chat-empty");
+  if (empty) empty.remove();
+  const wrap = document.createElement("div");
+  wrap.className = "msg msg-user";
+  const b = document.createElement("div");
+  b.className = "bubble";
+  b.textContent = text;
+  wrap.appendChild(b);
+  chatScroll.appendChild(wrap);
+  return wrap;
+}
+
+function addAssistantBubble(initialHtml) {
+  const wrap = document.createElement("div");
+  wrap.className = "msg msg-assistant";
+  const tag = document.createElement("div");
+  tag.className = "role-tag";
+  tag.textContent = "旅程助手";
+  const b = document.createElement("div");
+  b.className = "bubble md";
+  b.innerHTML = initialHtml || "";
+  wrap.appendChild(tag);
+  wrap.appendChild(b);
+  chatScroll.appendChild(wrap);
+  return { wrap, bubble: b };
+}
+
+function addToolLog() {
+  const details = document.createElement("details");
+  details.className = "tool-log";
+  details.open = true;
+  const summary = document.createElement("summary");
+  summary.innerHTML = '<span class="searching">正在检索地图信息…</span>';
+  const ul = document.createElement("ul");
+  details.appendChild(summary);
+  details.appendChild(ul);
+  chatScroll.appendChild(details);
+  scrollToBottom();
+  return { details, summary, ul, count: 0 };
+}
+
+/* ── 轻量 markdown 渲染 ───────────── */
+
+function esc(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderMarkdown(text) {
+  const lines = esc(text).split("\n");
+  let html = "";
+  let listType = null;
+  const closeList = () => {
+    if (listType) { html += `</${listType}>`; listType = null; }
+  };
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) { closeList(); continue; }
+    let m;
+    if ((m = t.match(/^#{2,4}\s+(.*)$/))) {
+      closeList();
+      const lvl = Math.min(m[1] && 4, m[0].startsWith("###") ? 4 : 3);
+      html += `<h${lvl}>${inline(m[1])}</h${lvl}>`;
+    } else if ((m = t.match(/^[-*•]\s+(.*)$/))) {
+      if (listType !== "ul") { closeList(); html += "<ul>"; listType = "ul"; }
+      html += `<li>${inline(m[1])}</li>`;
+    } else if ((m = t.match(/^\d+[.、)]\s+(.*)$/))) {
+      if (listType !== "ol") { closeList(); html += "<ol>"; listType = "ol"; }
+      html += `<li>${inline(m[1])}</li>`;
+    } else if (/^(-{3,}|—{3,}|*{3,})$/.test(t)) {
+      closeList();
+      html += "<hr>";
+    } else {
+      closeList();
+      html += `<p>${inline(t)}</p>`;
+    }
+  }
+  closeList();
+  return html;
+}
+
+function inline(s) {
+  return s
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
+}
+
+function scrollToBottom() {
+  chatScroll.scrollTop = chatScroll.scrollHeight;
+}
+
+/* ── SSE 流式请求 ─────────────────── */
+
+async function streamChat(payload) {
+  const resp = await fetch(`${API}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!resp.ok) {
+    let detail = `请求失败（${resp.status}）`;
+    try {
+      const data = await resp.json();
+      if (data.detail) detail = typeof data.detail === "string" ? data.detail : detail;
+    } catch (e) {}
+    throw new Error(detail);
+  }
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  const handlers = {
+    tool: null, token: null, done: null, error: null,
+  };
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
+    let idx;
+    while ((idx = buf.indexOf("\n\n")) >= 0) {
+      const block = buf.slice(0, idx);
+      buf = buf.slice(idx + 2);
+      let event = "message", data = "";
+      for (const line of block.split("\n")) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) data += line.slice(5).trim();
+      }
+      let parsed = data;
+      try { parsed = JSON.parse(data); } catch (e) {}
+      const h = handlers[event];
+      if (h) h(parsed);
+    }
+  }
+  return handlers;
+}
+
+/* ── 一轮对话 ─────────────────────── */
+
+async function runRound(payload, userDisplayText) {
+  addUserBubble(userDisplayText);
+  setBusy(true);
+
+  const toolLog = addToolLog();
+  let assistant = null;
+  let answer = "";
+  let toolCount = 0;
+  let hadError = false;
+
+  try {
+    await streamChat(payload).then((h) => {
+      h.tool = (d) => {
+        toolCount++;
+        toolLog.summary.innerHTML =
+          `<span class="searching">正在检索地图信息…（已调用 ${toolCount} 次）</span>`;
+        const li = document.createElement("li");
+        const args = JSON.stringify(d.args || {});
+        li.innerHTML = `<b>${esc(d.name)}</b>(${esc(args)})`;
+        toolLog.ul.appendChild(li);
+        scrollToBottom();
+      };
+      h.token = (d) => {
+        if (!assistant) {
+          toolLog.details.open = false;
+          toolLog.summary.innerHTML =
+            `<span class="status-dot"></span>已检索 ${toolCount} 次地图数据`;
+          assistant = addAssistantBubble();
+        }
+        answer += d.text || "";
+        assistant.bubble.innerHTML = renderMarkdown(answer) + '<span class="cursor"></span>';
+        scrollToBottom();
+      };
+      h.done = () => {
+        if (assistant) {
+          assistant.bubble.innerHTML = renderMarkdown(answer);
+        }
+      };
+      h.error = (d) => {
+        hadError = true;
+        if (assistant) {
+          assistant.bubble.innerHTML = renderMarkdown(answer);
+        } else {
+          toolLog.details.remove();
+        }
+        const banner = document.createElement("div");
+        banner.className = "error-banner";
+        banner.textContent = d.message || "出错了，请重试";
+        chatScroll.appendChild(banner);
+        scrollToBottom();
+      };
+    });
+  } catch (e) {
+    hadError = true;
+    if (!assistant) toolLog.details.remove();
+    const banner = document.createElement("div");
+    banner.className = "error-banner";
+    banner.textContent = e.message || "网络错误，请检查后端是否已启动";
+    chatScroll.appendChild(banner);
+    scrollToBottom();
+  }
+
+  if (!hadError && !assistant) {
+    toolLog.details.remove();
+    addAssistantBubble("<p>（没有生成内容，请换个说法试试）</p>");
+  }
+
+  setBusy(false);
+  if (!hadError && answer) {
+    $("followupInput").disabled = false;
+    $("followupBtn").disabled = false;
+  }
+}
+
+function setBusy(v) {
+  busy = v;
+  $("planBtn").disabled = v;
+  $("planBtn").textContent = v ? "规划中…" : "规划路线";
+  $("followupBtn").disabled = v || $("followupInput").disabled;
+  if (v) $("followupInput").disabled = true;
+}
+
+/* ── 事件绑定 ─────────────────────── */
+
+$("tripForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (busy) return;
+  formError.textContent = "";
+  const destination = $("f-dest").value.trim();
+  const days = parseInt($("f-days").value, 10);
+  if (!destination) { formError.textContent = "请填写目的地"; return; }
+  if (!Number.isInteger(days) || days < 1) { formError.textContent = "天数需为正整数"; return; }
+
+  const trip = { days, destination };
+  const opt = (id) => { const v = $(id).value.trim(); return v || undefined; };
+  if (opt("f-date")) trip.date = opt("f-date");
+  if (opt("f-people")) trip.people = opt("f-people");
+  if (opt("f-budget")) trip.budget = opt("f-budget");
+  const attr = opt("f-attr");
+  if (attr) trip.attractions = attr.split(/[，,、;；/]+/).map(s => s.trim()).filter(Boolean);
+
+  const display = `计划去${destination}旅游${days}天` +
+    (trip.date ? `，${trip.date}出发` : "") +
+    (trip.people ? `，${trip.people}` : "") +
+    (trip.budget ? `，预算${trip.budget}` : "") +
+    (trip.attractions ? `，想去${trip.attractions.join("、")}` : "");
+
+  await runRound({ session_id: sessionId, trip_request: trip }, display);
+  $("f-dest").value = ""; $("f-days").value = ""; $("f-date").value = "";
+  $("f-people").value = ""; $("f-budget").value = ""; $("f-attr").value = "";
+});
+
+async function sendFollowup() {
+  const input = $("followupInput");
+  const text = input.value.trim();
+  if (!text || busy) return;
+  input.value = "";
+  await runRound({ session_id: sessionId, query: text }, text);
+  input.focus();
+}
+
+$("followupBtn").addEventListener("click", sendFollowup);
+$("followupInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendFollowup();
+});
+$("endBtn").addEventListener("click", endSession);
+
+ensureSession().catch((e) => {
+  $("sessionChip").textContent = "后端未连接";
+  const banner = document.createElement("div");
+  banner.className = "error-banner";
+  banner.textContent = "无法连接后端，请先运行：python server.py";
+  chatScroll.innerHTML = "";
+  chatScroll.appendChild(banner);
+});
+</script>
+</body>
+</html>
